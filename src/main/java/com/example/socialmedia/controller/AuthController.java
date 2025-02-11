@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -16,10 +17,11 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 import static org.springframework.validation.BindingResult.MODEL_KEY_PREFIX;
 
-@RestController
+@Controller
 @Slf4j
 public class AuthController {
     private final UserService userService;
@@ -30,59 +32,53 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public String register(@Valid @ModelAttribute RegisterUserDTO user,
-                           final BindingResult binding,
-                           RedirectAttributes redirectAttributes,
-                           HttpSession httpSession) {
+    public String register(
+            @Valid @ModelAttribute("registeredUser") RegisterUserDTO user,
+            BindingResult binding,
+            RedirectAttributes redirectAttributes,
+            HttpSession httpSession) {
+
         if (httpSession.getAttribute("loggedInUser") != null) {
             httpSession.invalidate();
         }
+
         if (binding.hasErrors()) {
-            log.error("Error registering user: {}", binding.getAllErrors());
-            redirectAttributes.addFlashAttribute("registeredUser", user);
-            redirectAttributes.addFlashAttribute(MODEL_KEY_PREFIX + "registeredUser", binding);
+            redirectAttributes.addFlashAttribute("registeredUser", binding);
+            redirectAttributes.addFlashAttribute(MODEL_KEY_PREFIX + "registeredUser", user);
             return "redirect:register";
         }
+
+        LocalDate today = LocalDate.now();
+        LocalDate validMinDateForRegistration = today.minusYears(18);
+
+        if (!user.getPassword().equals(user.getConfirmPassword())) {
+            redirectAttributes.addFlashAttribute("errors", "Passwords do not match.");
+            redirectAttributes.addFlashAttribute("registeredUser", user);
+            return "redirect:/register";
+        }
+
+        if (user.getDateOfBirth() == null || user.getDateOfBirth().isAfter(validMinDateForRegistration)) {
+            redirectAttributes.addFlashAttribute("errors", "You must be at least 18 years old to register.");
+            redirectAttributes.addFlashAttribute("registeredUser", user);
+            return "redirect:/register";
+        }
+
         try {
-            LocalDate today = LocalDate.now();
-            int todayDay = today.getDayOfMonth();
-            int todayMonth = today.getMonthValue();
-            int todayYear = today.getYear();
-            LocalDate validMinDateForRegistration = LocalDate.of(todayYear - 18, todayMonth, todayDay);
-            if(user.getDateOfBirth().isAfter(validMinDateForRegistration)) {
-                String errors = "Sorry, but You are too young to register in this site.";
-                redirectAttributes.addFlashAttribute("errors", errors);
-
-                if (!redirectAttributes.containsAttribute("registeredUser")) {
-                    redirectAttributes.addFlashAttribute("registeredUser", user);
-                }
-                return "redirect:register";
-            }
-
-            RegisterUserDTO registeredUser = userService.register(user).orElse(null);
-            if (registeredUser == null) {
-                String errors = "Invalid user registration data.";
-                redirectAttributes.addFlashAttribute("errors", errors);
-
-                if (!redirectAttributes.containsAttribute("registeredUser")) {
-                    redirectAttributes.addFlashAttribute("registeredUser", user);
-                }
-                return "redirect:register";
-            }
-
-            if (!redirectAttributes.containsAttribute("registeredUser")) {
+            Optional<RegisterUserDTO> registered = userService.register(user);
+            if (registered.isEmpty()) {
+                redirectAttributes.addFlashAttribute("errors", "Registration failed. Please try again.");
                 redirectAttributes.addFlashAttribute("registeredUser", user);
+                return "redirect:/register";
             }
-            return "redirect:login";
+            return "redirect:/login";
         } catch (Exception e) {
-            if (!redirectAttributes.containsAttribute("registeredUser")) {
-                redirectAttributes.addFlashAttribute("registeredUser", user);
-            }
-            return "redirect:register";
+            redirectAttributes.addFlashAttribute("errors", "An unexpected error occurred. Please try again.");
+            redirectAttributes.addFlashAttribute("registeredUser", user);
+            return "redirect:/register";
         }
     }
 
-    @PostMapping("/")
+    @PostMapping("/login")
     public String login(@Valid @ModelAttribute LoginUserDTO user,
                         final BindingResult binding,
                         Model model,
@@ -107,7 +103,7 @@ public class AuthController {
 
             httpSession.setAttribute("loggedInUser", loggedInUser);
 
-            return "redirect:home";
+            return "redirect:/home";
         } catch (Exception e) {
             if (!model.containsAttribute("loggedInUser")) {
                 model.addAttribute("loggedInUser", user != null ? user : new LoginUserDTO());
