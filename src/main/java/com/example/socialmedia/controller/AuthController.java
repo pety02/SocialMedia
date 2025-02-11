@@ -2,6 +2,7 @@ package com.example.socialmedia.controller;
 
 import com.example.socialmedia.dto.LoginUserDTO;
 import com.example.socialmedia.dto.RegisterUserDTO;
+import com.example.socialmedia.dto.UserDTO;
 import com.example.socialmedia.service.interfaces.UserService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
@@ -13,6 +14,8 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.time.LocalDate;
 
 import static org.springframework.validation.BindingResult.MODEL_KEY_PREFIX;
 
@@ -41,8 +44,22 @@ public class AuthController {
             return "redirect:register";
         }
         try {
-            RegisterUserDTO registeredUser = userService.register(user).orElse(null);
+            LocalDate today = LocalDate.now();
+            int todayDay = today.getDayOfMonth();
+            int todayMonth = today.getMonthValue();
+            int todayYear = today.getYear();
+            LocalDate validMinDateForRegistration = LocalDate.of(todayYear - 18, todayMonth, todayDay);
+            if(user.getDateOfBirth().isAfter(validMinDateForRegistration)) {
+                String errors = "Sorry, but You are too young to register in this site.";
+                redirectAttributes.addFlashAttribute("errors", errors);
 
+                if (!redirectAttributes.containsAttribute("registeredUser")) {
+                    redirectAttributes.addFlashAttribute("registeredUser", user);
+                }
+                return "redirect:register";
+            }
+
+            RegisterUserDTO registeredUser = userService.register(user).orElse(null);
             if (registeredUser == null) {
                 String errors = "Invalid user registration data.";
                 redirectAttributes.addFlashAttribute("errors", errors);
@@ -81,17 +98,14 @@ public class AuthController {
             return "redirect:login";
         }
         try {
-            String username = user.getUsername();
-            String password = user.getPassword();
-            user = userService.login(username, password).orElse(null);
-            if (user == null) {
+            UserDTO loggedInUser = userService.login(user).orElse(null);
+            if (loggedInUser == null) {
                 String errors = "Invalid user credentials.";
                 redirectAttributes.addAttribute("errors", errors);
                 return "redirect:login";
             }
 
-            var loggedInUser = userService.getUserByUsername(user.getUsername()).orElseThrow();
-            httpSession.setAttribute("user", loggedInUser);
+            httpSession.setAttribute("loggedInUser", loggedInUser);
 
             return "redirect:home";
         } catch (Exception e) {

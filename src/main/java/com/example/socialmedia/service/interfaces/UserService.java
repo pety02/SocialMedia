@@ -12,5 +12,5 @@ public interface UserService {
             throws NoSuchElementException;
     Optional<RegisterUserDTO> register(RegisterUserDTO registerUserDTO);
 
-    Optional<LoginUserDTO> login(String username, String password);
+    Optional<UserDTO> login(LoginUserDTO loginUserDTO);
 }
