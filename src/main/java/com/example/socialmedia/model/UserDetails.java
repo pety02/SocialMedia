@@ -16,6 +16,7 @@ import java.util.List;
 public class UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_details_id")
     private Integer id;
     @Column(length = 150)
     private String name;
@@ -30,8 +31,8 @@ public class UserDetails {
     private String resume;
     @Enumerated(EnumType.STRING)
     private ProfileType profileType;
-    @OneToOne
+    @OneToOne(fetch = FetchType.EAGER)
     private User credentials;
-    @OneToOne
+    @OneToOne(fetch = FetchType.EAGER)
     private MediaFile profilePicture;
 }

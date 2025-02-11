@@ -1,7 +1,6 @@
 package com.example.socialmedia.model;
 
 import jakarta.persistence.*;
-import jdk.jfr.Timestamp;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -26,8 +25,8 @@ public class Message {
     private LocalDateTime updateDateTime;
     @Column
     private LocalDateTime deleteDateTime;
-    @ManyToOne
+    @OneToOne(fetch = FetchType.EAGER)
     private User benefactor;
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<User> recipients;
 }

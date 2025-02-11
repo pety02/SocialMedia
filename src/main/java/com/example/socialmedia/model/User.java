@@ -6,36 +6,43 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Table
 @Entity
-@IdClass(UserId.class)
 public class User {
-    @Id
-    @Column(nullable = false, unique = true, length = 360)
-    private String email;
-    @Id
-    @Column(nullable = false, unique = true, length = 100)
-    private String username;
+    @EmbeddedId
+    private UserId id;
+
     @Column(nullable = false, length = 100)
     private String password;
-    @OneToOne
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "user_details_id", nullable = false)
     private UserDetails details;
-    @OneToMany
-    private List<User> friends;
-    @OneToMany
-    private List<Post> createdPosts;
-    @OneToMany
-    private List<Post> likedPosts;
-    @OneToMany
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "user_friends",
+            joinColumns = {
+                    @JoinColumn(name = "user_email", referencedColumnName = "user_email"),
+                    @JoinColumn(name = "user_username", referencedColumnName = "user_username")
+            },
+            inverseJoinColumns = {
+                    @JoinColumn(name = "friend_email", referencedColumnName = "user_email"),
+                    @JoinColumn(name = "friend_username", referencedColumnName = "user_username")
+            }
+    )
+    private Set<User> friends;
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Set<Post> createdPosts;
+    @ManyToMany(mappedBy = "likedBy", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Set<Post> likedPosts;
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Event> organisedEvents;
-    @OneToMany
-    private List<Event> interestsEvents;
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Message> writtenMessages;
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Message> receivedMessages;
 }

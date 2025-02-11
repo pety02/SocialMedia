@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -26,8 +27,6 @@ public class MediaFile {
     private String fullPath;
     @Lob
     private Byte[] content;
-    @OneToMany
-    private List<Post> addedInPosts;
-    @OneToMany
-    private List<Event> addedInEvents;
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Set<Post> addedInPosts;
 }

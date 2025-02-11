@@ -1,13 +1,12 @@
 package com.example.socialmedia.model;
 
 import jakarta.persistence.*;
-import jdk.jfr.Timestamp;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -27,12 +26,33 @@ public class Event {
     private LocalDateTime endDateTime;
     @Column(length = 500)
     private String description;
-    @ManyToOne
+    @OneToOne(fetch = FetchType.EAGER)
     private Location location;
-    @ManyToOne
-    private UserDetails organisedBy;
-    @OneToMany
-    private List<MediaFile> files;
-    @OneToMany
-    private List<User> interestedIn;
+    @OneToOne(fetch = FetchType.EAGER)
+    private User organisedBy;
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "event_files",
+            joinColumns = {
+                    @JoinColumn(name = "event_title", referencedColumnName = "title"),
+                    @JoinColumn(name = "event_start_time", referencedColumnName = "startDateTime"),
+                    @JoinColumn(name = "event_end_time", referencedColumnName = "endDateTime")
+            },
+            inverseJoinColumns = @JoinColumn(name = "file_id", referencedColumnName = "id")
+    )
+    private Set<MediaFile> files;
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "event_interests",
+            joinColumns = {
+                    @JoinColumn(name = "event_title", referencedColumnName = "title"),
+                    @JoinColumn(name = "event_start_time", referencedColumnName = "startDateTime"),
+                    @JoinColumn(name = "event_end_time", referencedColumnName = "endDateTime")
+            },
+            inverseJoinColumns = {
+                    @JoinColumn(name = "user_email", referencedColumnName = "user_email"),
+                    @JoinColumn(name = "user_username", referencedColumnName = "user_username")
+            }
+    )
+    private Set<User> interestedIn;
 }

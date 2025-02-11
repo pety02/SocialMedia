@@ -22,6 +22,6 @@ public class Location {
     private String livingArea;
     @Column(nullable = false, length = 100)
     private String addressDetails;
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Event> events;
 }

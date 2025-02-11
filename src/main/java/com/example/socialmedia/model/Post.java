@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -26,12 +27,20 @@ public class Post {
     private LocalDateTime updateDateTime;
     @Column
     private LocalDateTime deleteDateTime;
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<MediaFile> files;
     @OneToOne
     private User publishedBy;
-    @OneToMany
-    private List<User> likedBy;
-    @OneToMany
-    private List<Comment> comments;
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "post_likes",
+            joinColumns = @JoinColumn(name = "post_id"),
+            inverseJoinColumns = {
+                    @JoinColumn(name = "user_email", referencedColumnName = "user_email"),
+                    @JoinColumn(name = "user_username", referencedColumnName = "user_username")
+            }
+    )
+    private Set<User> likedBy;
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Set<Comment> comments;
 }
