@@ -30,6 +30,4 @@ public class Message {
     private User benefactor;
     @OneToMany
     private List<User> recipients;
-    @OneToMany
-    private List<MediaFile> files;
 }

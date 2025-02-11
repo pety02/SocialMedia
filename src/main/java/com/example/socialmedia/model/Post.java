@@ -27,8 +27,6 @@ public class Post {
     @Column
     private LocalDateTime deleteDateTime;
     @OneToMany
-    private List<User> taggedUsers;
-    @OneToMany
     private List<MediaFile> files;
     @OneToOne
     private User publishedBy;

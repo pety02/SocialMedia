@@ -22,10 +22,6 @@ public class Location {
     private String livingArea;
     @Column(nullable = false, length = 100)
     private String addressDetails;
-    @OneToOne
-    private Business business;
-    @OneToOne
-    private EducationCenter educationCenter;
     @OneToMany
     private List<Event> events;
 }

@@ -26,12 +26,12 @@ public class UserDetails {
     @ElementCollection(targetClass = Role.class)
     @Enumerated(EnumType.STRING)
     private List<Role> roles;
-    @OneToOne
-    private MediaFile profilePicture;
     @Column(length = 500)
     private String resume;
     @Enumerated(EnumType.STRING)
     private ProfileType profileType;
     @OneToOne
     private User credentials;
+    @OneToOne
+    private MediaFile profilePicture;
 }

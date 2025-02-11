@@ -27,7 +27,7 @@ public class Event {
     private LocalDateTime endDateTime;
     @Column(length = 500)
     private String description;
-    @OneToOne
+    @ManyToOne
     private Location location;
     @ManyToOne
     private UserDetails organisedBy;
@@ -35,6 +35,4 @@ public class Event {
     private List<MediaFile> files;
     @OneToMany
     private List<User> interestedIn;
-    @OneToMany
-    private List<User> goingTo;
 }

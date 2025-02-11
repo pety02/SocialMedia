@@ -27,9 +27,7 @@ public class MediaFile {
     @Lob
     private Byte[] content;
     @OneToMany
-    private List<Post> posts;
-    @ManyToOne
-    private User uploadedBy;
+    private List<Post> addedInPosts;
     @OneToMany
-    private List<Event> events;
+    private List<Event> addedInEvents;
 }

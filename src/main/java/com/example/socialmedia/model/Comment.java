@@ -26,7 +26,5 @@ public class Comment {
     @Column
     private LocalDateTime deletedOn;
     @ManyToOne
-    private User createdBy;
-    @ManyToOne
     private Post post;
 }

@@ -25,15 +25,9 @@ public class User {
     @OneToOne
     private UserDetails details;
     @OneToMany
-    private List<StudyDetails> studyDetails;
-    @OneToMany
-    private List<WorkingExperience> workingPlaces;
-    @OneToMany
     private List<User> friends;
     @OneToMany
     private List<Post> createdPosts;
-    @OneToMany
-    private List<Post> taggedInPosts;
     @OneToMany
     private List<Post> likedPosts;
     @OneToMany
@@ -41,13 +35,7 @@ public class User {
     @OneToMany
     private List<Event> interestsEvents;
     @OneToMany
-    private List<Event> goingEvents;
-    @OneToMany
-    private List<Comment> postedComments;
-    @OneToMany
     private List<Message> writtenMessages;
     @OneToMany
     private List<Message> receivedMessages;
-    @OneToMany
-    private List<MediaFile> uploadedFiles;
 }
